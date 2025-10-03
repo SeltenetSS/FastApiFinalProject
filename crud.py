@@ -1,26 +1,3 @@
-# from sqlalchemy.orm import Session
-# from models import User
-# from schemas import UserCreate
-# from auth import hash_password
-#
-# def get_user_by_email(db: Session, email: str):
-#     return db.query(User).filter(User.email == email).first()
-#
-# def create_user(db: Session, user: UserCreate):
-#     db_user = User(
-#         full_name=user.full_name,
-#         email=user.email,
-#         hashed_password=hash_password(user.password),
-#         is_admin=user.is_admin
-#     )
-#     db.add(db_user)
-#     try:
-#         db.commit()
-#         db.refresh(db_user)
-#         return db_user
-#     except Exception as e:
-#         db.rollback()  # rollback əlavə et
-#         raise e
 
 
 from sqlalchemy.orm import Session
@@ -49,12 +26,12 @@ def create_user(db: Session, user: UserCreate):
         db.refresh(db_user)
         return db_user
     except Exception as e:
-        db.rollback()  # rollback əlavə et
+        db.rollback()
         raise e
 
 
 
-# ---------------- PRODUCTS ----------------
+
 def create_product(db: Session, product: ProductCreate):
     db_product = Product(
         name=product.name,
@@ -99,7 +76,7 @@ def delete_product(db: Session, product_id: int):
     db.commit()
     return product
 
-# ---------------- CUSTOMERS ----------------
+
 def create_customer(db: Session, customer: CustomerCreate):
     db_customer = Customer(
         full_name=customer.full_name,
@@ -140,7 +117,7 @@ def delete_customer(db: Session, customer_id: int):
     db.commit()
     return customer
 
-# ---------------- ORDERS ----------------
+
 def create_order(db: Session, order_data: OrderCreate):
     order_total = 0
     db_order = Order(
@@ -149,7 +126,7 @@ def create_order(db: Session, order_data: OrderCreate):
         created_at=datetime.utcnow()
     )
     db.add(db_order)
-    db.commit()  # commit to get order id
+    db.commit()
     db.refresh(db_order)
 
     for item in order_data.items:
@@ -164,7 +141,7 @@ def create_order(db: Session, order_data: OrderCreate):
             unit_price=product.price,
             line_total=line_total
         )
-        product.qty_in_stock -= item.qty  # stokdan düşür
+        product.qty_in_stock -= item.qty
         db.add(db_order_item)
         order_total += line_total
 

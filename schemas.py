@@ -31,7 +31,6 @@ class Token(BaseModel):
 
 
 
-# Product
 class ProductBase(BaseModel):
     name: str
     price: float = Field(ge=0)
@@ -47,7 +46,7 @@ class ProductRead(ProductBase):
     class Config: from_attributes = True
 
 
-# Customer
+
 class CustomerBase(BaseModel):
     full_name: str
     email: EmailStr
@@ -61,7 +60,7 @@ class CustomerRead(CustomerBase):
     class Config: from_attributes = True
 
 
-# Order Item
+
 class OrderItemCreate(BaseModel):
     product_id: int
     qty: int
@@ -75,7 +74,7 @@ class OrderItemRead(BaseModel):
     class Config: from_attributes = True
 
 
-# Order
+
 class OrderCreate(BaseModel):
     customer_id: int
     items: List[OrderItemCreate]

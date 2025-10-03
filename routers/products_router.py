@@ -30,14 +30,32 @@
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+
+import models
 from database import get_db
 import schemas, crud
 
 router = APIRouter(prefix="/api/products", tags=["Products"])
 
 @router.get("/", response_model=list[schemas.ProductRead])
-def list_products(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    return crud.list_products(db, skip, limit)
+def list_products(
+    skip: int = 0,
+    limit: int = 100,
+    name: str | None = None,
+    min_price: float | None = None,
+    max_price: float | None = None,
+    db: Session = Depends(get_db)
+):
+    query = db.query(models.Product)
+
+    if name:
+        query = query.filter(models.Product.name.ilike(f"%{name}%"))
+    if min_price is not None:
+        query = query.filter(models.Product.price >= min_price)
+    if max_price is not None:
+        query = query.filter(models.Product.price <= max_price)
+
+    return query.offset(skip).limit(limit).all()
 
 @router.post("/", response_model=schemas.ProductRead)
 def create_product(product: schemas.ProductCreate, db: Session = Depends(get_db)):

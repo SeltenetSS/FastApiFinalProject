@@ -15,7 +15,7 @@ def register(user: schemas.UserCreate, db: Session = Depends(get_db)):
         return crud.create_user(db, user)
     except Exception as e:
         import traceback
-        traceback.print_exc()  # Bu terminalda xətanı göstərəcək
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail="Internal server error")
 
 @router.post("/login", response_model=schemas.Token)

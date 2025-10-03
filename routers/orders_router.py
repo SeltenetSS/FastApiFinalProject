@@ -1,13 +1,28 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+
+import models
 from database import get_db
 import schemas, crud
 
 router = APIRouter(prefix="/api/orders", tags=["Orders"])
 
 @router.get("/", response_model=list[schemas.OrderRead])
-def list_orders(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    return crud.list_orders(db, skip, limit)
+def list_orders(
+    skip: int = 0,
+    limit: int = 100,
+    status: str | None = None,
+    customer_id: int | None = None,
+    db: Session = Depends(get_db)
+):
+    query = db.query(models.Order)
+
+    if status:
+        query = query.filter(models.Order.status == status)
+    if customer_id:
+        query = query.filter(models.Order.customer_id == customer_id)
+
+    return query.offset(skip).limit(limit).all()
 
 @router.post("/", response_model=schemas.OrderRead)
 def create_order(order: schemas.OrderCreate, db: Session = Depends(get_db)):

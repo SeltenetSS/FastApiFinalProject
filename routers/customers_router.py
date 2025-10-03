@@ -1,13 +1,29 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+
+import models
 from database import get_db
 import schemas, crud
 
 router = APIRouter(prefix="/api/customers", tags=["Customers"])
 
 @router.get("/", response_model=list[schemas.CustomerRead])
-def list_customers(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    return crud.list_customers(db, skip, limit)
+def list_customers(
+    skip: int = 0,
+    limit: int = 100,
+    full_name: str | None = None,
+    email: str | None = None,
+    db: Session = Depends(get_db)
+):
+    query = db.query(models.Customer)
+
+    if full_name:
+        query = query.filter(models.Customer.full_name.ilike(f"%{full_name}%"))
+    if email:
+        query = query.filter(models.Customer.email.ilike(f"%{email}%"))
+
+    return query.offset(skip).limit(limit).all()
+
 
 @router.post("/", response_model=schemas.CustomerRead)
 def create_customer(customer: schemas.CustomerCreate, db: Session = Depends(get_db)):
