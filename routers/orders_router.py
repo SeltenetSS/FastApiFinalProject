@@ -94,7 +94,7 @@ def get_order(order_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Order not found")
     return db_order
 
-# ✅ YENİ: Status Body ilə qəbul edilsin
+
 class StatusUpdate(BaseModel):
     status: str
 

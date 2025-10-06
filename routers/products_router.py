@@ -27,15 +27,50 @@
 #     db.refresh(db_product)
 #     return db_product
 
-
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from sqlalchemy.orm import Session
-
-import models
+import shutil, os
+import crud, models, schemas
 from database import get_db
-import schemas, crud
 
 router = APIRouter(prefix="/api/products", tags=["Products"])
+
+
+UPLOAD_DIR = "uploads/products"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+
+@router.post("/upload-image")
+def upload_product_image(file: UploadFile = File(...)):
+    file_path = os.path.join(UPLOAD_DIR, file.filename)
+    with open(file_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+    return {"image_url": f"/static/products/{file.filename}"}
+
+
+@router.post("/", response_model=schemas.ProductRead)
+def create_product(
+    name: str = Form(...),
+    price: float = Form(...),
+    qty_in_stock: int = Form(...),
+    image: UploadFile | None = File(None),
+    db: Session = Depends(get_db)
+):
+    image_url = None
+    if image:
+        file_path = os.path.join(UPLOAD_DIR, image.filename)
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(image.file, buffer)
+        image_url = f"/static/products/{image.filename}"
+
+    product_data = schemas.ProductCreate(
+        name=name,
+        price=price,
+        qty_in_stock=qty_in_stock,
+        image_url=image_url
+    )
+    return crud.create_product(db, product_data)
+
 
 @router.get("/", response_model=list[schemas.ProductRead])
 def list_products(
@@ -57,9 +92,6 @@ def list_products(
 
     return query.offset(skip).limit(limit).all()
 
-@router.post("/", response_model=schemas.ProductRead)
-def create_product(product: schemas.ProductCreate, db: Session = Depends(get_db)):
-    return crud.create_product(db, product)
 
 @router.get("/{product_id}", response_model=schemas.ProductRead)
 def get_product(product_id: int, db: Session = Depends(get_db)):
@@ -74,6 +106,7 @@ def update_product(product_id: int, product: schemas.ProductCreate, db: Session 
     if not updated:
         raise HTTPException(status_code=404, detail="Product not found")
     return updated
+
 
 @router.delete("/{product_id}", response_model=schemas.ProductRead)
 def delete_product(product_id: int, db: Session = Depends(get_db)):

@@ -38,11 +38,11 @@ from jose import jwt, JWTError
 from fastapi import Security
 router = APIRouter(prefix="/api/auth", tags=["Auth"])
 
-# Token extract üçün
+
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 
 
-# 🔐 Token-dən istifadəçini tapmaq üçün helper funksiyası
+
 def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
@@ -57,7 +57,7 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
         raise HTTPException(status_code=401, detail="Invalid token")
 
 
-# ✅ Mövcud Register API
+
 @router.post("/register", response_model=schemas.UserOut)
 def register(user: schemas.UserCreate, db: Session = Depends(get_db)):
     try:
@@ -71,7 +71,7 @@ def register(user: schemas.UserCreate, db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
-# ✅ Mövcud Login API
+
 @router.post("/login", response_model=schemas.Token)
 def login(user: schemas.UserLogin, db: Session = Depends(get_db)):
     db_user = crud.get_user_by_email(db, user.email)

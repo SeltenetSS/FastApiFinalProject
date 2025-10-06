@@ -40,6 +40,9 @@
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
+from fastapi.staticfiles import StaticFiles
+
 import models
 from database import engine
 from routers import auth_router, products_router, customers_router, orders_router, reports_router
@@ -59,7 +62,7 @@ app.add_middleware(
 )
 
 
-
+app.mount("/static", StaticFiles(directory="uploads"), name="static")
 
 app.include_router(auth_router.router)
 app.include_router(products_router.router)

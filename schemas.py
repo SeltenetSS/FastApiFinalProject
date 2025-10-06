@@ -32,11 +32,12 @@ class Token(BaseModel):
 
 
 
-
 class ProductBase(BaseModel):
     name: str
     price: float = Field(ge=0)
     qty_in_stock: int = Field(ge=0)
+    image_url: Optional[str] = None
+
 
 class ProductCreate(ProductBase):
     sku: Optional[str] = None
@@ -45,8 +46,8 @@ class ProductRead(ProductBase):
     id: int
     slug: str
     is_active: bool
-    class Config: from_attributes = True
-
+    class Config:
+        from_attributes = True
 
 
 class CustomerBase(BaseModel):

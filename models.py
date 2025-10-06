@@ -29,8 +29,10 @@ class Product(Base):
     price = Column(Float, nullable=False)
     qty_in_stock = Column(Integer, default=0)
     is_active = Column(Boolean, default=True)
+    image_url = Column(String, nullable=True)
 
     order_items = relationship("OrderItem", back_populates="product")
+
 
 
 class Customer(Base):

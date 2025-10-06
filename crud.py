@@ -32,22 +32,7 @@ def create_user(db: Session, user: UserCreate):
 
 
 
-def create_product(db: Session, product: ProductCreate):
-    db_product = Product(
-        name=product.name,
-        slug=slugify(product.name),
-        sku=product.sku,
-        price=product.price,
-        qty_in_stock=product.qty_in_stock,
-    )
-    db.add(db_product)
-    try:
-        db.commit()
-        db.refresh(db_product)
-        return db_product
-    except Exception:
-        db.rollback()
-        raise
+
 
 def get_product(db: Session, product_id: int):
     return db.query(Product).filter(Product.id == product_id).first()
@@ -55,18 +40,35 @@ def get_product(db: Session, product_id: int):
 def list_products(db: Session, skip: int = 0, limit: int = 100):
     return db.query(Product).offset(skip).limit(limit).all()
 
+def create_product(db: Session, product: ProductCreate):
+    db_product = Product(
+        name=product.name,
+        slug=slugify(product.name),
+        sku=product.sku or f"SKU-{slugify(product.name)}",
+        price=product.price,
+        qty_in_stock=product.qty_in_stock,
+        image_url=product.image_url,
+    )
+    db.add(db_product)
+    db.commit()
+    db.refresh(db_product)
+    return db_product
+
+
 def update_product(db: Session, product_id: int, updated_data: ProductCreate):
     product = get_product(db, product_id)
     if not product:
         return None
     product.name = updated_data.name
     product.slug = slugify(updated_data.name)
-    product.sku = updated_data.sku
+    product.sku = updated_data.sku or f"SKU-{slugify(updated_data.name)}"
     product.price = updated_data.price
     product.qty_in_stock = updated_data.qty_in_stock
+    product.image_url = updated_data.image_url
     db.commit()
     db.refresh(product)
     return product
+
 
 def delete_product(db: Session, product_id: int):
     product = get_product(db, product_id)
