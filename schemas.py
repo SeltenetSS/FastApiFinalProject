@@ -27,6 +27,8 @@ class UserLogin(BaseModel):
 class Token(BaseModel):
     access_token: str
     token_type: str
+    user: UserOut
+
 
 
 
@@ -37,7 +39,7 @@ class ProductBase(BaseModel):
     qty_in_stock: int = Field(ge=0)
 
 class ProductCreate(ProductBase):
-    sku: str
+    sku: Optional[str] = None
 
 class ProductRead(ProductBase):
     id: int
